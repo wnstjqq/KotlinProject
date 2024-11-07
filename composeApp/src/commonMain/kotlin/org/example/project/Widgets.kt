@@ -25,23 +25,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 
-@Composable
-fun TopAppBar() {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Ecompass", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
 
-        Spacer(modifier = Modifier.height(10.dp))
-
-        // Search Bar
-        SearchBar(onSearch = {
-            // handle search logic here
-            println("Search: $it")
-        })
-    }
-}
 
 
 @Composable
