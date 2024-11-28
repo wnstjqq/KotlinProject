@@ -31,25 +31,72 @@ kotlin {
     jvm("desktop")
     
     sourceSets {
-        val desktopMain by getting
-        
-        androidMain.dependencies {
-            implementation(compose.preview)
-            implementation(libs.androidx.activity.compose)
+        val desktopMain by getting {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+                implementation(libs.kotlinx.coroutines.swing)
+                implementation(libs.retrofit)
+                implementation(libs.converter.gson)
+                implementation(libs.gson)
+            }
         }
-        commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material)
-            implementation(compose.material3)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+        val commonMain by getting {
+            dependencies {
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material)
+                implementation(compose.material3)
+                implementation(compose.ui)
+                implementation(compose.components.resources)
+                implementation(compose.components.uiToolingPreview)
+                implementation(libs.retrofit)
+                implementation(libs.converter.gson)
+                implementation(libs.gson)
+                implementation(libs.ktor.client.core.v237)
+                implementation(libs.ktor.client.json)
+                implementation(libs.ktor.client.serialization)
+            }
         }
-        desktopMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutines.swing)
+
+        val androidMain by getting {
+            dependencies {
+                implementation(compose.preview)
+                implementation(libs.androidx.activity.compose)
+                implementation(libs.retrofit)
+                implementation(libs.converter.gson)
+                implementation(libs.gson)
+            }
         }
+        val iosMain by creating {
+            dependencies {
+                implementation(libs.ktor.client.ios)
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.json)
+            }
+        }
+        val iosX64Main by getting {
+            dependencies {
+                implementation(libs.ktor.client.ios)
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.json)
+            }
+
+        }
+        val iosArm64Main by getting {
+            dependencies {
+                implementation(libs.ktor.client.ios)
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.json)
+            }
+        }
+        val iosSimulatorArm64Main by getting {
+            dependencies {
+                implementation(libs.ktor.client.ios)
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.json)
+            }
+        }
+
     }
 }
 
@@ -82,6 +129,9 @@ android {
 
 dependencies {
     implementation(libs.androidx.ui.text.android)
+    implementation(libs.androidx.lifecycle.viewmodel.android)
+    implementation(libs.androidx.material.android)
+    implementation(libs.androidx.material.android)
     debugImplementation(compose.uiTooling)
 }
 

@@ -16,8 +16,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.OutlinedTextField
@@ -25,69 +23,65 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import androidx.compose.material.icons.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import kotlinproject.composeapp.generated.resources.Res
 import org.jetbrains.compose.resources.painterResource
 import kotlinproject.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.DrawableResource
-import kotlin.coroutines.CoroutineContext
 
+expect fun createRetrofit(): Any
 
 @Composable
 fun AnimatedScreenTransition() {
     var currentScreen by remember { mutableStateOf("home") }
 
-    when(currentScreen) {
-        "home" -> App(
-            onBambooClick = { currentScreen = "bamboo" },
-            onSearchEnter = { currentScreen = "searchResult" },
-            onLiked = { currentScreen = "like" }
-        )
-        "bamboo" -> Bamboo(onBackBarClick = { currentScreen = "home" })
-        "searchResult" -> SearchResultScreen(onBackBarClick = { currentScreen = "home" })
-        "like" -> like(
-            onHome = { currentScreen = "home" }
-        )
-        "searchResults" -> SearchResultScreen(onHome = { currentScreen = " home"},
-            onLiked = { currentScreen = "like" }
-        )
+    AnimatedContent(targetState = currentScreen) { screen ->
+        when (screen) {
+            "home" -> App(
+                onBambooClick = { currentScreen = "bamboo" },
+                onSearchEnter = { currentScreen = "searchResult" },
+                onLiked = { currentScreen = "like" },
+                onProfile= { currentScreen = "profile"}
+            )
+            "bamboo" -> Bamboo(onBackBarClick = { currentScreen = "home" })
+            "searchResult" -> SearchResultScreen(
+                onBackBarClick = { currentScreen = "home" },
+                onLiked = { currentScreen = "like" },
+                onSolid = { currentScreen = "solid"}
+            )
+            "profile" -> MyHomeScreen(onHome = { currentScreen = "home"},
+                onLiked = { currentScreen = "like"})
+            "like" -> like(onHome = { currentScreen = "home" },
+                onProfile= { currentScreen = "profile"})
+            "solid" -> solid(onBackBarClick = { currentScreen = "searchResult" })
+        }
     }
 }
 
 @Composable
 fun App(onBambooClick: () -> Unit,
         onSearchEnter: () -> Unit,
-        onLiked: () -> Unit){
+        onLiked: () -> Unit,
+        onProfile: () -> Unit){
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf("", "", "")
     val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.Favorite, Icons.Filled.Person)
     val unselectedIcons =
         listOf(Icons.Outlined.Home, Icons.Outlined.FavoriteBorder, Icons.Outlined.Person)
     var isVisible by remember { mutableStateOf(true)}
-    val scrollState = rememberScrollState()
-    var searchText by remember { mutableStateOf("") }
-    var currentScreen by remember { mutableStateOf("App ") }
 
     Box(modifier = Modifier.fillMaxSize().padding(bottom = 10.dp)) {
         // Main content on top of the NavigationBar
@@ -140,7 +134,7 @@ fun App(onBambooClick: () -> Unit,
                         horizontalArrangement = Arrangement.spacedBy(18.dp)// Item padding
                 ) {
                     items(itemList.size) { itemIndex ->
-                        ItemCard(itemList[itemIndex].first, itemList[itemIndex].second, onBambooClick)
+                        ItemCard(itemList[itemIndex], onBambooClick)
                     }
                 }}
             }
@@ -183,6 +177,9 @@ fun App(onBambooClick: () -> Unit,
                             // 하트(좋아요) 아이콘 클릭 시 like 화면으로 이동
                             if (index == 1) {  // 1은 하트 아이콘의 인덱스
                                 onLiked()
+                            }
+                            else if(index == 2) {
+                                onProfile()
                             }
                         },
                         modifier = Modifier
@@ -254,7 +251,9 @@ fun SearchBar(
 
 @Composable
 fun Bamboo(onBackBarClick: () -> Unit) {
-    var currentScreen by remember { mutableStateOf("bamboo") }  // 화면 상태를 관리
+    val uriHandler = LocalUriHandler.current
+    var currentScreen by remember { mutableStateOf("bamboo") }
+    var selectedItem by remember { mutableIntStateOf(0) }
     Box(modifier = Modifier.fillMaxSize()) {
         // 첫 번째 화면: 대나무 화면
         AnimatedVisibility(
@@ -279,9 +278,17 @@ fun Bamboo(onBackBarClick: () -> Unit) {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // 상단 텍스트
-                Text(
-                    text = "Ecompass",
-                    fontWeight = FontWeight.Bold
+                CustomNavigationBar(
+                    items = listOf("친환경", "일반"),
+                    selectedIcons = listOf("친환경", "일반"),
+                    unselectedIcons = listOf("친환경", "일반"),
+                    selectedItem = selectedItem,
+                    onItemSelected = { index ->
+                        selectedItem = index
+                        if (index == 1) {
+                            currentScreen = "newScreen"
+                        }
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -294,10 +301,6 @@ fun Bamboo(onBackBarClick: () -> Unit) {
                         .fillMaxWidth()
                         .height(200.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .clickable {
-                            // 이미지 클릭 시 애니메이션 효과를 주면서 다른 화면으로 변경
-                            currentScreen = "newScreen"  // 화면을 새로 바꿈
-                        }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -346,11 +349,16 @@ fun Bamboo(onBackBarClick: () -> Unit) {
 
                 // 버튼
                 Button(
-                    onClick = { /* 구매 버튼 클릭 시 동작 */ },
+                    onClick = {
+                        uriHandler.openUri("https://smartstore.naver.com/giraffe_store/products/5497692332?nl-au=451e104c09f7467bbc7eb4c287c6cfdd&nl-query=%EB%8C%80%EB%82%98%EB%AC%B4+%EC%B9%AB%EC%86%94")
+                              },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
-                    shape = RoundedCornerShape(25.dp)
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFA1B5D8)
+                    )
                 ) {
                     Text("구매하러 가기", color = Color.White)
                 }
@@ -380,9 +388,17 @@ fun Bamboo(onBackBarClick: () -> Unit) {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // 상단 텍스트
-                Text(
-                    text = "Ecompass",
-                    fontWeight = FontWeight.Bold
+                CustomNavigationBar(
+                    items = listOf("친환경", "일반"),
+                    selectedIcons = listOf("친환경", "일반"),
+                    unselectedIcons = listOf("친환경", "일반"),
+                    selectedItem = selectedItem,
+                    onItemSelected = { index ->
+                        selectedItem = index
+                        if (index == 0) {
+                            currentScreen = "bamboo"
+                        }
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -395,10 +411,6 @@ fun Bamboo(onBackBarClick: () -> Unit) {
                         .fillMaxWidth()
                         .height(200.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .clickable {
-                            // 이미지 클릭 시 애니메이션 효과를 주면서 다른 화면으로 변경
-                            currentScreen = "bamboo"  // 원래 화면으로 되돌림
-                        }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -437,7 +449,9 @@ fun Bamboo(onBackBarClick: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
-                    shape = RoundedCornerShape(25.dp)
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFA1B5D8))
                 ) {
                     Text("구매하러 가기", color = Color.White)
                 }
@@ -445,6 +459,219 @@ fun Bamboo(onBackBarClick: () -> Unit) {
         }
     }
 }
+
+@Composable
+fun solid(onBackBarClick: () -> Unit) {
+    val uriHandler = LocalUriHandler.current
+    var currentScreen by remember { mutableStateOf("solid") }
+    var selectedItem by remember { mutableIntStateOf(0) }// 화면 상태를 관리
+    Box(modifier = Modifier.fillMaxSize()) {
+        // 첫 번째 화면: 대나무 화면
+        AnimatedVisibility(
+            visible = currentScreen == "solid",
+            enter = fadeIn(tween(1000)) + slideInHorizontally(initialOffsetX = { 1000 }), // 오른쪽에서 왼쪽으로 슬라이드
+            exit = fadeOut(tween(1000)) + slideOutHorizontally(targetOffsetX = { -1000 }) // 왼쪽으로 슬라이드
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // 뒤로 가기 버튼
+                IconButton(
+                    onClick = onBackBarClick,
+                    modifier = Modifier.align(Alignment.Start)
+                ) {
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로가기")
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // 상단 텍스트
+                CustomNavigationBar(
+                    items = listOf("친환경", "일반"),
+                    selectedIcons = listOf("친환경", "일반"),
+                    unselectedIcons = listOf("친환경", "일반"),
+                    selectedItem = selectedItem,
+                    onItemSelected = { index ->
+                        selectedItem = index
+                        if (index == 1) {
+                            currentScreen = "newScreen"
+                        }
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 이미지
+                Image(
+                    painter = painterResource(resource = Res.drawable.solid),
+                    contentDescription = "고체 치약",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 제목 텍스트
+                Text(
+                    text = "고체 치약",
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // 설명 텍스트를 스크롤 가능하게 변경
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(8.dp))
+                        .height(400.dp)
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState()) // 스크롤 추가
+                ) {
+                    Text(
+                        text = "일반 치약에 비해 재활용 가능한 포장재로 제공,\n" +
+                                "폐기물 문제를 줄이는 데 기여함.\n" +
+                                "\n" +
+                                "고체 치약은 알약 형태로, 개별 포장되어 있어 \n" +
+                                "필요한 개수만큼 가져갈 수 있어 편리함.\n" +
+                                "\n" +
+                                "한 알에 필요한 양만 정확히 포함되어 있어 \n" +
+                                "과도한 치약 사용을 방지할 수 있음.\n" +
+                                "\n" +
+                                "천연 성분으로 만들어져 인체와 환경에 더 안전함\n" +
+                                "특히 화학 성분에 민감한 사람들에게 좋음.\n"            ,
+                        textAlign = TextAlign.Start
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 버튼
+                Button(
+                    onClick = {
+                        uriHandler.openUri("https://smartstore.naver.com/mintedshop/products/7149880472?nl-au=cd944803b34f40d3afd7222badf7bbfb&nl-query=%EA%B3%A0%EC%B2%B4%EC%B9%98%EC%95%BD")
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFA1B5D8)
+                    )
+                ) {
+                    Text("구매하러 가기", color = Color.White)
+                }
+            }
+        }
+
+        // 두 번째 화면: 새 화면
+        AnimatedVisibility(
+            visible = currentScreen == "newScreen",
+            enter = fadeIn(tween(1000)) + slideInHorizontally(initialOffsetX = { -1000 }), // 왼쪽에서 오른쪽으로 슬라이드
+            exit = fadeOut(tween(1000)) + slideOutHorizontally(targetOffsetX = { 1000 }) // 오른쪽으로 슬라이드
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // 뒤로 가기 버튼
+                IconButton(
+                    onClick = onBackBarClick,
+                    modifier = Modifier.align(Alignment.Start)
+                ) {
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로가기")
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // 상단 텍스트
+                CustomNavigationBar(
+                    items = listOf("친환경", "일반"),
+                    selectedIcons = listOf("친환경", "일반"),
+                    unselectedIcons = listOf("친환경", "일반"),
+                    selectedItem = selectedItem,
+                    onItemSelected = { index ->
+                        selectedItem = index
+                        if (index == 0) {
+                            currentScreen = "solid"
+                        }
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 이미지
+                Image(
+                    painter = painterResource(resource = Res.drawable.common),
+                    contentDescription = "일반 치약",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable {
+                            // 이미지 클릭 시 애니메이션 효과를 주면서 다른 화면으로 변경
+                            currentScreen = "solid"  // 원래 화면으로 되돌림
+                        }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 제목 텍스트
+                Text(
+                    text = "일반 치약",
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // 설명 텍스트를 스크롤 가능하게 변경
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(8.dp))
+                        .height(400.dp)
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState()) // 스크롤 추가
+                ) {
+                    Text(
+                        text = "일반 치약은 주로 플라스틱 유브에 담겨 있어 \n" +
+                                "일반 치약에는 보존제, 인공 색소, 향료,\n" +
+                                "과도한 거품을 내기 위한 계면활성제 등이 포함.\n" +
+                                "입안의 민감성, 구강 건강 문제를 야기.\n\n" +
+                                "원하는 양을 짜내기 때문에 필요 이상으로 \n" +
+                                "많이 짜내거나 낭비하기 쉬움.\n\n" +
+                                "일반 치약은 부피가 크고 무거우며, 액체류로 \n" +
+                                "간주될 수 있어 기내 반입에 제약이 있음.\n\n" ,
+                        textAlign = TextAlign.Start
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 버튼
+                Button(
+                    onClick = { /* 구매 버튼 클릭 시 동작 */ },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFA1B5D8))
+                ) {
+                    Text("구매하러 가기", color = Color.White)
+                }
+            }
+        }
+    }
+}
+
 
 
 
@@ -468,8 +695,9 @@ fun SearchResultScreen(
     onLiked: () -> Unit = {},
     onHome: () -> Unit ={},
     onBackBarClick: () -> Unit={},
+    onSolid: () -> Unit={},
     modifier: Modifier = Modifier,
-    searchText: String = "고체"
+    searchText: String = "solid"
 ) {
     var currentScreen by remember { mutableStateOf("searchResult") }
     var selectedItem by remember { mutableIntStateOf(2) } // 1은 하트 아이콘의 인덱스
@@ -480,6 +708,8 @@ fun SearchResultScreen(
         bottomBar = {  },
         modifier = modifier.fillMaxSize()
     ) { paddingValues ->
+        Box(modifier = Modifier
+            .fillMaxSize()){
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -497,8 +727,7 @@ fun SearchResultScreen(
                 Text(
                     text = "Ecompass",
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 8.dp)
+                    fontWeight = FontWeight.Bold
                 )
             }
 
@@ -517,14 +746,15 @@ fun SearchResultScreen(
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(sampleProducts) { product ->
-                    ProductCard(product)
+                items(sampleProducts.size) { index ->
+                    ProductCard(sampleProducts[index], onSolid)
                 }
+            }
             }
             NavigationBar(
                 containerColor = Color(0x80E7E6ED),
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
+                    .align(Alignment.BottomCenter)
                     .padding(bottom = 10.dp)
                     .clip(RoundedCornerShape(50.dp))
                     .height(60.dp)
@@ -565,14 +795,13 @@ fun SearchResultScreen(
     }
 }
 @Composable
-fun ProductCard(product: ProductItem) {
+fun ProductCard(product: ProductItem, onSolid:() ->Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(120.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFAFAFA)
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF2EDE4)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -593,8 +822,9 @@ fun ProductCard(product: ProductItem) {
                     contentDescription = product.name,
                     modifier = Modifier
                         .size(90.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(onClick = onSolid),
+                    contentScale = ContentScale.Crop,
                 )
 
                 Spacer(modifier = Modifier.width(16.dp))
@@ -673,20 +903,21 @@ val sampleProducts = listOf(
         name = "고체 샴푸바",
         rating = 4.84,
         price = 7600,
-        imageResource = Res.drawable.solid,
+        imageResource = Res.drawable.soft,
         tags = listOf("친환경", "zero waste")
     ),
     ProductItem(
         name = "고체 치약",
         rating = 4.69,
         price = 9520,
-        imageResource = Res.drawable.soft,
+        imageResource = Res.drawable.solid,
         tags = listOf("천연", "플라스틱 프리")
     )
 )
 
 @Composable
-fun like(onHome: () -> Unit) {
+fun like(onHome: () -> Unit,
+         onProfile: () -> Unit) {
     var selectedItem by remember { mutableIntStateOf(1) } // 1은 하트 아이콘의 인덱스
     val items = listOf("", "", "")
     val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.Favorite, Icons.Filled.Person)
@@ -713,13 +944,13 @@ fun like(onHome: () -> Unit) {
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Liked Items Section
             Text(
-                text = "찜한 상품",
+                text = "좋아요",
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp).padding(start = 12.dp)
             )
 
             // Liked Items List
@@ -762,7 +993,7 @@ fun like(onHome: () -> Unit) {
                             selectedItem = index
                             when (index) {
                                 0 -> onHome() // 하트 아이콘 클릭
-                                // 2 -> onProfile() // 프로필 아이콘 클릭 (필요한 경우 추가)
+                                2 -> onProfile() // 프로필 아이콘 클릭 (필요한 경우 추가)
                             }
                         },
                         modifier = Modifier
@@ -781,8 +1012,7 @@ private fun LikedProductCard(product: ProductItem) {
             .fillMaxWidth()
             .height(120.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFAFAFA)
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF2EDE4)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -876,14 +1106,78 @@ private val likedProducts = listOf(
         name = "고체 샴푸바",
         rating = 4.84,
         price = 7600,
-        imageResource = Res.drawable.solid,
+        imageResource = Res.drawable.soft,
         tags = listOf("친환경", "zero waste")
     ),
     ProductItem(
         name = "고체 치약",
         rating = 4.69,
         price = 9520,
-        imageResource = Res.drawable.soft,
+        imageResource = Res.drawable.solid,
         tags = listOf("천연", "플라스틱 프리")
     )
 )
+
+@Composable
+fun CustomNavigationBar(
+    items: List<String>,
+    selectedIcons: List<String>,
+    unselectedIcons: List<String>,
+    onItemSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    selectedItem: Int = 0
+) {
+    val backgroundColor = Color(0x80E7E6ED)
+    val selectedItemColor = Color(0xFFA1B5D8)
+
+    Surface(
+        modifier = modifier
+            .clip(RoundedCornerShape(50.dp))
+            .height(60.dp)
+            .width(200.dp),
+        color = backgroundColor,
+        shape = RoundedCornerShape(50.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items.forEachIndexed { index, _ ->
+                NavigationItem(
+                    isSelected = selectedItem == index,
+                    selectedText = selectedIcons[index],
+                    unselectedText = unselectedIcons[index],
+                    selectedBackgroundColor = selectedItemColor,
+                    onItemClick = { onItemSelected(index) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NavigationItem(
+    isSelected: Boolean,
+    selectedText: String,
+    unselectedText: String,
+    selectedBackgroundColor: Color,
+    onItemClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(50.dp))
+            .background(if (isSelected) selectedBackgroundColor else Color.Transparent)
+            .clickable(onClick = onItemClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    ) {
+        Text(
+            text = if (isSelected) selectedText else unselectedText,
+            color = if (isSelected) Color.White else Color.Black,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
