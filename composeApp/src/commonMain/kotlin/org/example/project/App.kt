@@ -45,17 +45,34 @@ import org.jetbrains.compose.resources.DrawableResource
 expect fun createRetrofit(): Any
 
 @Composable
-fun AnimatedScreenTransition() {
+fun App() {
     var currentScreen by remember { mutableStateOf("home") }
 
     AnimatedContent(targetState = currentScreen) { screen ->
         when (screen) {
-            "home" -> App(
+            "home" -> Main(
                 onBambooClick = { currentScreen = "bamboo" },
                 onSearchEnter = { currentScreen = "searchResult" },
                 onLiked = { currentScreen = "like" },
-                onProfile= { currentScreen = "profile"}
+                onProfile= { currentScreen = "profile"},
+                onSolid= { currentScreen = "solid"},
+                onBar = { currentScreen = "Bar"},
+                onCup = { currentScreen = "Cup"},
+                onSusemi = { currentScreen = "Susemi"},
+                onSilicon = { currentScreen = "Silicon"},
+                onSmell = { currentScreen = "Smell"},
+                onStainless = { currentScreen = "Stainless"},
+                onTisue = { currentScreen = "Tisue"},
+                onSoft = { currentScreen = "Soft"}
             )
+            "Bar" -> Bar(onBackBarClick = { currentScreen = "home" })
+            "Cup" -> Cup(onBackBarClick = { currentScreen = "home" })
+            "Susemi" -> Susemi(onBackBarClick = { currentScreen = "home" })
+            "Silicon" -> Silicon(onBackBarClick = { currentScreen = "home" })
+            "Smell" -> Smell(onBackBarClick = { currentScreen = "home" })
+            "Stainless" -> Stainless(onBackBarClick = { currentScreen = "home" })
+            "Tisue" -> Tisue(onBackBarClick = { currentScreen = "home" })
+            "Soft" -> Soft(onBackBarClick = { currentScreen = "home" })
             "bamboo" -> Bamboo(onBackBarClick = { currentScreen = "home" })
             "searchResult" -> SearchResultScreen(
                 onBackBarClick = { currentScreen = "home" },
@@ -72,10 +89,19 @@ fun AnimatedScreenTransition() {
 }
 
 @Composable
-fun App(onBambooClick: () -> Unit,
+fun Main(onBambooClick: () -> Unit,
         onSearchEnter: () -> Unit,
         onLiked: () -> Unit,
-        onProfile: () -> Unit){
+        onProfile: () -> Unit,
+        onSolid: () -> Unit,
+        onBar: () -> Unit,
+        onCup: () -> Unit,
+        onSusemi: () -> Unit,
+        onSilicon: () -> Unit,
+        onSmell: () -> Unit,
+        onStainless: () -> Unit,
+        onTisue: () -> Unit,
+        onSoft: () -> Unit) {
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf("", "", "")
     val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.Favorite, Icons.Filled.Person)
@@ -134,7 +160,26 @@ fun App(onBambooClick: () -> Unit,
                         horizontalArrangement = Arrangement.spacedBy(18.dp)// Item padding
                 ) {
                     items(itemList.size) { itemIndex ->
-                        ItemCard(itemList[itemIndex], onBambooClick)
+                        if (itemIndex == 0)
+                            ItemCard(itemList[itemIndex], onBambooClick)
+                        else if (itemIndex == 1)
+                            ItemCard(itemList[itemIndex], onSoft)
+                        else if (itemIndex == 2)
+                            ItemCard(itemList[itemIndex], onSusemi)
+                        else if (itemIndex == 3)
+                            ItemCard(itemList[itemIndex], onSolid)
+                        else if (itemIndex == 4)
+                            ItemCard(itemList[itemIndex], onBar)
+                        else if (itemIndex == 5)
+                            ItemCard(itemList[itemIndex], onSmell)
+                        else if (itemIndex == 6)
+                            ItemCard(itemList[itemIndex], onSilicon)
+                        else if (itemIndex == 7)
+                            ItemCard(itemList[itemIndex], onStainless)
+                        else if (itemIndex == 8)
+                            ItemCard(itemList[itemIndex], onCup)
+                        else if (itemIndex == 9)
+                            ItemCard(itemList[itemIndex], onTisue)
                     }
                 }}
             }
@@ -191,495 +236,6 @@ fun App(onBambooClick: () -> Unit,
         }
     }
 }
-
-
-
-@Composable
-fun SearchBar(
-    modifier: Modifier = Modifier,
-    onSearchBarClick: (String) -> Unit={},
-    onSearchEnter: (String) -> Unit={} // 엔터 이벤트 처리
-) {
-    var searchText by remember { mutableStateOf("") }
-
-    OutlinedTextField(
-        value = searchText,
-        onValueChange = {
-            searchText = it
-            onSearchBarClick(it)
-        },
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .onKeyEvent { event ->
-                if (event.key == Key.Enter) {
-                    onSearchEnter(searchText)  // 엔터 키를 눌렀을 때 처리
-                    true
-                } else {
-                    false
-                }
-            },
-        placeholder = { Text("검색어를 입력하세요") },
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search Icon",
-                tint = Color.Gray
-            )
-        },
-        trailingIcon = {
-            if (searchText.isNotEmpty()) {
-                IconButton(onClick = { searchText = "" }) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Clear Text",
-                        tint = Color.Gray
-                    )
-                }
-            }
-        },
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedBorderColor = Color(0xFF6200EE),
-            unfocusedBorderColor = Color.Gray,
-            backgroundColor = Color.White
-        ),
-        shape = RoundedCornerShape(24.dp),
-        singleLine = true,
-    )
-}
-
-
-@Composable
-fun Bamboo(onBackBarClick: () -> Unit) {
-    val uriHandler = LocalUriHandler.current
-    var currentScreen by remember { mutableStateOf("bamboo") }
-    var selectedItem by remember { mutableIntStateOf(0) }
-    Box(modifier = Modifier.fillMaxSize()) {
-        // 첫 번째 화면: 대나무 화면
-        AnimatedVisibility(
-            visible = currentScreen == "bamboo",
-            enter = fadeIn(tween(1000)) + slideInHorizontally(initialOffsetX = { 1000 }), // 오른쪽에서 왼쪽으로 슬라이드
-            exit = fadeOut(tween(1000)) + slideOutHorizontally(targetOffsetX = { -1000 }) // 왼쪽으로 슬라이드
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // 뒤로 가기 버튼
-                IconButton(
-                    onClick = onBackBarClick,
-                    modifier = Modifier.align(Alignment.Start)
-                ) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로가기")
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // 상단 텍스트
-                CustomNavigationBar(
-                    items = listOf("친환경", "일반"),
-                    selectedIcons = listOf("친환경", "일반"),
-                    unselectedIcons = listOf("친환경", "일반"),
-                    selectedItem = selectedItem,
-                    onItemSelected = { index ->
-                        selectedItem = index
-                        if (index == 1) {
-                            currentScreen = "newScreen"
-                        }
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 이미지
-                Image(
-                    painter = painterResource(resource = Res.drawable.chop),
-                    contentDescription = "대나무 칫솔",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 제목 텍스트
-                Text(
-                    text = "대나무 칫솔",
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // 설명 텍스트를 스크롤 가능하게 변경
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(8.dp))
-                        .height(400.dp)
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState()) // 스크롤 추가
-                ) {
-                    Text(
-                        text = "대나무 칫솔의 손잡이는 자연에서 쉽게 분해 가능합니다.\n\n"+
-                                "대나무는 빠르게 자라는 식물로, 재배와 수확이 쉽고 지속 가능한 자원으로써 자원 낭비를 줄일 수 있습니다.\n\n"+
-                                "대나무에는 자연적으로 향균 성분이 있어, 사용 중 박테리아 번식을 억제하는 데 도움줄 수 있습니다.\n\n"+
-                                "대나무 칫솔을 사용하면 미세 플라스틱 문제를 줄일 수 있습니다.\n\n"+
-                                "사용자 리뷰          4.85\n\n"+
-                                "    5   \n" +
-                                "suak****| 24.10.19. | 대나무 칫솔 : 검정  나무의 잎 이라는 기업명 답게 상자 포장 테이프부터 안쪽 포장까지 전부 종이였어요! 친환경입니다 ㅎㅎ 물건 하나하나 사용법, 버리는 법까지...\n\n"+
-                                "    5\n"+
-                                "wjaw****| 24.10.21. | 대나무 칫솔 : 검정  원래 대나무 칫솔 쓰고 있는데요. 여러 사람한테 나눠 줘야 할 일이 있어서 조금 많이 구매했어요. 가격도 비싸지 않고, 많이 샀다고 몇 개 더 주셨네요. 친절한 편지도 감사 드려요. 잘 쓰겠습니다.\n"+
-                                "더보기...\n\n"+
-                                "관련 정보\n"+
-                                "자연 분해 가능성: 대나무 칫솔의 손잡이는 자연에서 쉽게 분해됩니다. 대나무는 생분해성이 뛰어나며, 폐기 시 환경에 미치는 영향이 적습니다. https://www.greencompostables.com/blog/bamboo-toothbrush\n\n"+
-                                "지속 가능한 자원: 대나무는 성장 속도가 매우 빠른 식물로, 하루에 최대 1미터까지 자랄 수 있습니다. 이러한 특성으로 인해 재배와 수확이 용이하며, 지속 가능한 자원으로 활용됩니다.\n"+
-                                "https://www.joongang.co.kr/article/25065732\n\n"+
-                                "자연 항균 성분: 대나무에는 항균 작용이 포함되어 있어, 사용 중 박테리아 번식을 억제하는 데 도움이 됩니다. 이로 인해 곰팡이 발생이 적고 위생적인 사용이 가능합니다.\n"+
-                                "https://www.greencompostables.com/blog/bamboo-toothbrush\n\n"+
-                                "미세 플라스틱 문제 감소: 대나무 칫솔을 사용하면 플라스틱 사용을 줄여 미세 플라스틱 문제를 완화할 수 있습니다. 플라스틱 칫솔은 분해되지 않고 환경에 축적되지만, 대나무 칫솔은 자연 분해되어 환경 오염을 줄입니다.\n"+
-                                "https://www.greencompostables.com/blog/bamboo-toothbrush "                    ,
-                        textAlign = TextAlign.Start
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 버튼
-                Button(
-                    onClick = {
-                        uriHandler.openUri("https://smartstore.naver.com/giraffe_store/products/5497692332?nl-au=451e104c09f7467bbc7eb4c287c6cfdd&nl-query=%EB%8C%80%EB%82%98%EB%AC%B4+%EC%B9%AB%EC%86%94")
-                              },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(25.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFA1B5D8)
-                    )
-                ) {
-                    Text("구매하러 가기", color = Color.White)
-                }
-            }
-        }
-
-        // 두 번째 화면: 새 화면
-        AnimatedVisibility(
-            visible = currentScreen == "newScreen",
-            enter = fadeIn(tween(1000)) + slideInHorizontally(initialOffsetX = { -1000 }), // 왼쪽에서 오른쪽으로 슬라이드
-            exit = fadeOut(tween(1000)) + slideOutHorizontally(targetOffsetX = { 1000 }) // 오른쪽으로 슬라이드
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // 뒤로 가기 버튼
-                IconButton(
-                    onClick = onBackBarClick,
-                    modifier = Modifier.align(Alignment.Start)
-                ) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로가기")
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // 상단 텍스트
-                CustomNavigationBar(
-                    items = listOf("친환경", "일반"),
-                    selectedIcons = listOf("친환경", "일반"),
-                    unselectedIcons = listOf("친환경", "일반"),
-                    selectedItem = selectedItem,
-                    onItemSelected = { index ->
-                        selectedItem = index
-                        if (index == 0) {
-                            currentScreen = "bamboo"
-                        }
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 이미지
-                Image(
-                    painter = painterResource(resource = Res.drawable.plastic),
-                    contentDescription = "플라스틱 칫솔",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 제목 텍스트
-                Text(
-                    text = "투명 플라스틱 칫솔",
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // 설명 텍스트를 스크롤 가능하게 변경
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(8.dp))
-                        .height(400.dp)
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState()) // 스크롤 추가
-                ) {
-                    Text(
-                        text = "물과 습기에 강해 오래 사용할 수 있고 손잡이가 쉽게 변형되지 않아 실용적임.\n\n" +
-                                "상대적으로 저렴한 가격에 제공됨.\n\n" +
-                                "하지만, 사용 후 폐기물이 환경에 큰 영향을 미침.\n\n" +
-                                "일부 저렴한 플라스틱 칫솔은 제조 과정에서 유해 화학 물질이 포함될 수 있어 건강에 해로울 가능성이 있음.",
-                        textAlign = TextAlign.Start
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 버튼
-                Button(
-                    onClick = { /* 구매 버튼 클릭 시 동작 */ },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(25.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFA1B5D8))
-                ) {
-                    Text("구매하러 가기", color = Color.White)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun solid(onBackBarClick: () -> Unit) {
-    val uriHandler = LocalUriHandler.current
-    var currentScreen by remember { mutableStateOf("solid") }
-    var selectedItem by remember { mutableIntStateOf(0) }// 화면 상태를 관리
-    Box(modifier = Modifier.fillMaxSize()) {
-        // 첫 번째 화면: 대나무 화면
-        AnimatedVisibility(
-            visible = currentScreen == "solid",
-            enter = fadeIn(tween(1000)) + slideInHorizontally(initialOffsetX = { 1000 }), // 오른쪽에서 왼쪽으로 슬라이드
-            exit = fadeOut(tween(1000)) + slideOutHorizontally(targetOffsetX = { -1000 }) // 왼쪽으로 슬라이드
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // 뒤로 가기 버튼
-                IconButton(
-                    onClick = onBackBarClick,
-                    modifier = Modifier.align(Alignment.Start)
-                ) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로가기")
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // 상단 텍스트
-                CustomNavigationBar(
-                    items = listOf("친환경", "일반"),
-                    selectedIcons = listOf("친환경", "일반"),
-                    unselectedIcons = listOf("친환경", "일반"),
-                    selectedItem = selectedItem,
-                    onItemSelected = { index ->
-                        selectedItem = index
-                        if (index == 1) {
-                            currentScreen = "newScreen"
-                        }
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 이미지
-                Image(
-                    painter = painterResource(resource = Res.drawable.solid),
-                    contentDescription = "고체 치약",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 제목 텍스트
-                Text(
-                    text = "고체 치약",
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // 설명 텍스트를 스크롤 가능하게 변경
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(8.dp))
-                        .height(400.dp)
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState()) // 스크롤 추가
-                ) {
-                    Text(
-                        text = "일반 치약에 비해 재활용 가능한 포장재로 제공,\n" +
-                                "폐기물 문제를 줄이는 데 기여함.\n" +
-                                "\n" +
-                                "고체 치약은 알약 형태로, 개별 포장되어 있어 \n" +
-                                "필요한 개수만큼 가져갈 수 있어 편리함.\n" +
-                                "\n" +
-                                "한 알에 필요한 양만 정확히 포함되어 있어 \n" +
-                                "과도한 치약 사용을 방지할 수 있음.\n" +
-                                "\n" +
-                                "천연 성분으로 만들어져 인체와 환경에 더 안전함\n" +
-                                "특히 화학 성분에 민감한 사람들에게 좋음.\n"            ,
-                        textAlign = TextAlign.Start
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 버튼
-                Button(
-                    onClick = {
-                        uriHandler.openUri("https://smartstore.naver.com/mintedshop/products/7149880472?nl-au=cd944803b34f40d3afd7222badf7bbfb&nl-query=%EA%B3%A0%EC%B2%B4%EC%B9%98%EC%95%BD")
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(25.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFA1B5D8)
-                    )
-                ) {
-                    Text("구매하러 가기", color = Color.White)
-                }
-            }
-        }
-
-        // 두 번째 화면: 새 화면
-        AnimatedVisibility(
-            visible = currentScreen == "newScreen",
-            enter = fadeIn(tween(1000)) + slideInHorizontally(initialOffsetX = { -1000 }), // 왼쪽에서 오른쪽으로 슬라이드
-            exit = fadeOut(tween(1000)) + slideOutHorizontally(targetOffsetX = { 1000 }) // 오른쪽으로 슬라이드
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // 뒤로 가기 버튼
-                IconButton(
-                    onClick = onBackBarClick,
-                    modifier = Modifier.align(Alignment.Start)
-                ) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로가기")
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // 상단 텍스트
-                CustomNavigationBar(
-                    items = listOf("친환경", "일반"),
-                    selectedIcons = listOf("친환경", "일반"),
-                    unselectedIcons = listOf("친환경", "일반"),
-                    selectedItem = selectedItem,
-                    onItemSelected = { index ->
-                        selectedItem = index
-                        if (index == 0) {
-                            currentScreen = "solid"
-                        }
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 이미지
-                Image(
-                    painter = painterResource(resource = Res.drawable.common),
-                    contentDescription = "일반 치약",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable {
-                            // 이미지 클릭 시 애니메이션 효과를 주면서 다른 화면으로 변경
-                            currentScreen = "solid"  // 원래 화면으로 되돌림
-                        }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 제목 텍스트
-                Text(
-                    text = "일반 치약",
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // 설명 텍스트를 스크롤 가능하게 변경
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(8.dp))
-                        .height(400.dp)
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState()) // 스크롤 추가
-                ) {
-                    Text(
-                        text = "일반 치약은 주로 플라스틱 유브에 담겨 있어 \n" +
-                                "일반 치약에는 보존제, 인공 색소, 향료,\n" +
-                                "과도한 거품을 내기 위한 계면활성제 등이 포함.\n" +
-                                "입안의 민감성, 구강 건강 문제를 야기.\n\n" +
-                                "원하는 양을 짜내기 때문에 필요 이상으로 \n" +
-                                "많이 짜내거나 낭비하기 쉬움.\n\n" +
-                                "일반 치약은 부피가 크고 무거우며, 액체류로 \n" +
-                                "간주될 수 있어 기내 반입에 제약이 있음.\n\n" ,
-                        textAlign = TextAlign.Start
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 버튼
-                Button(
-                    onClick = { /* 구매 버튼 클릭 시 동작 */ },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(25.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFA1B5D8))
-                ) {
-                    Text("구매하러 가기", color = Color.White)
-                }
-            }
-        }
-    }
-}
-
-
-
-
-
-
-
-
-
 
 data class ProductItem(
     val name: String,

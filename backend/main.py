@@ -42,11 +42,11 @@ async def upload_json(file: UploadFile, db: Session = Depends(get_db)):
         for product_data in data:
             product = Product(
                 name=product_data["name"],
-                image_url=product_data["image_url"],
                 price=product_data["price"],
-                description=product_data["description"],
-                url=product_data["url"],
-                rating=product_data["rating"]
+                image_url=product_data["image_url"],
+                link=product_data["link"],
+                rating=product_data["rating"],
+                review_link=product_data["review_link"]
             )
             db.add(product)
         db.commit()
@@ -65,11 +65,11 @@ def read_products(db: Session = Depends(get_db)):
         {
             "id": product.id,
             "name": product.name,
-            "image_url": product.image_url,
             "price": product.price,
-            "description": product.description,
-            "url": product.url,
+            "link": product.link,
+            "image_url": product.image_url,
             "rating": product.rating,
+            "review_link": product.review_link,
         }
         for product in products
     ]
@@ -83,11 +83,11 @@ def read_products_by_name(name: str, db: Session = Depends(get_db)):
         {
             "id": product.id,
             "name": product.name,
-            "image_url": product.image_url,
             "price": product.price,
-            "description": product.description,
-            "url": product.url,
+            "link": product.link,
+            "image_url": product.image_url,
             "rating": product.rating,
+            "review_link": product.review_link,
         }
         for product in products
     ]

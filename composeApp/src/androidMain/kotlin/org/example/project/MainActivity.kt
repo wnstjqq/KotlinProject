@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            AnimatedScreenTransition()
+            App()
         }
     }
 }
@@ -28,5 +28,5 @@ actual fun createRetrofit(): Any {
 @Preview
 @Composable
 fun AppAndroidPreview() {
-    AnimatedScreenTransition()
+    App()
 }

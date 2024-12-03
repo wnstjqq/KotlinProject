@@ -14,11 +14,11 @@ class Product(Base):
     __tablename__ = "products"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
+    price = Column(String)
+    link = Column(String)
     image_url = Column(String)
-    price = Column(Float)
-    description = Column(String)
-    url = Column(String)
-    rating = Column(Float)
+    rating = Column(String)
+    review_link = Column(String)
 
 
 # 데이터베이스 테이블 생성

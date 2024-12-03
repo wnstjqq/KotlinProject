@@ -6,14 +6,20 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -90,6 +96,59 @@ fun ItemCard(product: ProductItem, onNavigate: () -> Unit) {
     }
 }
 
+@Composable
+fun SearchBar(
+    modifier: Modifier = Modifier,
+    onSearchBarClick: (String) -> Unit={},
+    onSearchEnter: (String) -> Unit={} // 엔터 이벤트 처리
+) {
+    var searchText by remember { mutableStateOf("") }
+
+    androidx.compose.material.OutlinedTextField(
+        value = searchText,
+        onValueChange = {
+            searchText = it
+            onSearchBarClick(it)
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .onKeyEvent { event ->
+                if (event.key == Key.Enter) {
+                    onSearchEnter(searchText)  // 엔터 키를 눌렀을 때 처리
+                    true
+                } else {
+                    false
+                }
+            },
+        placeholder = { Text("검색어를 입력하세요") },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search Icon",
+                tint = Color.Gray
+            )
+        },
+        trailingIcon = {
+            if (searchText.isNotEmpty()) {
+                IconButton(onClick = { searchText = "" }) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Clear Text",
+                        tint = Color.Gray
+                    )
+                }
+            }
+        },
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = Color(0xFF6200EE),
+            unfocusedBorderColor = Color.Gray,
+            backgroundColor = Color.White
+        ),
+        shape = RoundedCornerShape(24.dp),
+        singleLine = true,
+    )
+}
 
 data class Product(
     val id: Int,
