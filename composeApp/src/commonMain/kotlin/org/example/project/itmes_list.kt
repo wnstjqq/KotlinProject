@@ -5,20 +5,28 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import kotlinproject.composeapp.generated.resources.Res
-import kotlinproject.composeapp.generated.resources.chop
-import kotlinproject.composeapp.generated.resources.plastic
+import androidx.compose.ui.unit.sp
 import kotlinproject.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
 
@@ -1911,11 +1919,7 @@ fun Bamboo(onBackBarClick: () -> Unit) {
                 // 제목 텍스트
                 Text(
                     text = "대나무 칫솔",
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
+                    textAlign = TextAlign.Center)
                 // 설명 텍스트를 스크롤 가능하게 변경
                 Column(
                     modifier = Modifier
@@ -1925,26 +1929,36 @@ fun Bamboo(onBackBarClick: () -> Unit) {
                         .padding(16.dp)
                         .verticalScroll(rememberScrollState()) // 스크롤 추가
                 ) {
-                    Text(
-                        text = "대나무 칫솔의 손잡이는 자연에서 쉽게 분해 가능합니다.\n\n"+
-                                "대나무는 빠르게 자라는 식물로, 재배와 수확이 쉽고 지속 가능한 자원으로써 자원 낭비를 줄일 수 있습니다.\n\n"+
-                                "대나무에는 자연적으로 향균 성분이 있어, 사용 중 박테리아 번식을 억제하는 데 도움줄 수 있습니다.\n\n"+
-                                "대나무 칫솔을 사용하면 미세 플라스틱 문제를 줄일 수 있습니다.\n\n"+
-                                "사용자 리뷰          4.85\n\n"+
-                                "    5   \n" +
-                                "suak****| 24.10.19. | 대나무 칫솔 : 검정  나무의 잎 이라는 기업명 답게 상자 포장 테이프부터 안쪽 포장까지 전부 종이였어요! 친환경입니다 ㅎㅎ 물건 하나하나 사용법, 버리는 법까지...\n\n"+
-                                "    5\n"+
-                                "wjaw****| 24.10.21. | 대나무 칫솔 : 검정  원래 대나무 칫솔 쓰고 있는데요. 여러 사람한테 나눠 줘야 할 일이 있어서 조금 많이 구매했어요. 가격도 비싸지 않고, 많이 샀다고 몇 개 더 주셨네요. 친절한 편지도 감사 드려요. 잘 쓰겠습니다.\n"+
-                                "더보기...\n\n"+
-                                "관련 정보\n"+
-                                "자연 분해 가능성: 대나무 칫솔의 손잡이는 자연에서 쉽게 분해됩니다. 대나무는 생분해성이 뛰어나며, 폐기 시 환경에 미치는 영향이 적습니다. https://www.greencompostables.com/blog/bamboo-toothbrush\n\n"+
-                                "지속 가능한 자원: 대나무는 성장 속도가 매우 빠른 식물로, 하루에 최대 1미터까지 자랄 수 있습니다. 이러한 특성으로 인해 재배와 수확이 용이하며, 지속 가능한 자원으로 활용됩니다.\n"+
-                                "https://www.joongang.co.kr/article/25065732\n\n"+
-                                "자연 항균 성분: 대나무에는 항균 작용이 포함되어 있어, 사용 중 박테리아 번식을 억제하는 데 도움이 됩니다. 이로 인해 곰팡이 발생이 적고 위생적인 사용이 가능합니다.\n"+
-                                "https://www.greencompostables.com/blog/bamboo-toothbrush\n\n"+
-                                "미세 플라스틱 문제 감소: 대나무 칫솔을 사용하면 플라스틱 사용을 줄여 미세 플라스틱 문제를 완화할 수 있습니다. 플라스틱 칫솔은 분해되지 않고 환경에 축적되지만, 대나무 칫솔은 자연 분해되어 환경 오염을 줄입니다.\n"+
-                                "https://www.greencompostables.com/blog/bamboo-toothbrush "                    ,
-                        textAlign = TextAlign.Start
+                    StyledText(
+                        title = "주요 특징",
+                        content = buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("• 100% 자연 친화적 소재")
+                            }
+                            append(": 대나무 칫솔은 100% 자연에서 온 대나무로 만들어져 사용 후에도 자연스럽게 분해되어 지구에 부담을 주지 않음.\n\n")
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("• 완전한 생분해")
+                            }
+                            append(": 대나무는 빠르게 자라며, 농약이나 화학 비료를 사용하지 않기 때문에 자연 그대로의 상태로 사용될 수 있음.\n\n")
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("• 내구성")
+                            }
+                            append(": 대나무 칫솔은 내구성이 뛰어나며, 사용이 편리한 가격대의 플라스틱 칫솔에 비해 경제적임.")
+                        }
+                    )
+
+                    StyledText(
+                        title = "주요 사항",
+                        content = buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("""
+• 칫솔을 너무 오랜 시간 동안 습기가 있는 곳에 두지 말고, 건조한 곳에 보관하십시오.
+                                    
+• 대나무는 물에 오래 노출되면 변형될 수 있으므로 사용 후 잘 말려주십시오.
+                                    
+• 칫솔의 강도와 경도에 따라 칫솔의 사용 느낌이 달라지며, 일반적으로 부드럽고, 중간, 단단한 종류가 있습니다.""")
+                            }
+                        }
                     )
                 }
 
@@ -2060,5 +2074,24 @@ fun Bamboo(onBackBarClick: () -> Unit) {
                 }
             }
         }
+    }
+}
+
+@Composable
+fun StyledText(title: String, content: AnnotatedString) {
+    Column(
+        modifier = Modifier.padding(vertical = 8.dp)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.subtitle1.copy(fontWeight = FontWeight.Bold),
+            color = Color(0xFF000000)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = content,
+            style = MaterialTheme.typography.body2.copy(lineHeight = 20.sp),
+            color = Color.Black
+        )
     }
 }

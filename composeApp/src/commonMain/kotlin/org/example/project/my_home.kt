@@ -39,11 +39,14 @@ fun MyHomeScreen(onHome: () -> Unit,
     val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.Favorite, Icons.Filled.Person)
     val unselectedIcons =
         listOf(Icons.Outlined.Home, Icons.Outlined.FavoriteBorder, Icons.Outlined.Person)
+    val scrollState = rememberScrollState() // 스크롤 상태
     Box(modifier = Modifier.fillMaxSize().padding(bottom = 10.dp)) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .fillMaxWidth()
                 .background(Color.White)
+                .verticalScroll(scrollState) // 스크롤 추가
         ) {
             TopBar()
             Spacer(modifier = Modifier.height(30.dp))
@@ -104,14 +107,10 @@ fun TopBar() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.ArrowBack,
-            contentDescription = "Back",
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = "Ecompass",
             style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold)
@@ -155,24 +154,30 @@ fun DividerSection() {
 
 @Composable
 fun CommunitySection() {
-    Column {
-        Text(text = "커뮤니티",
-            modifier = Modifier
-                .padding(8.dp),
+    Column(
+        modifier = Modifier
+            .wrapContentHeight() // 높이 무한 제약 방지
+            .padding(8.dp)
+    ) {
+        Text(
+            text = "커뮤니티",
             color = Color.Black,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
         DividerSection()
         SectionItem(icon = Icons.Default.Create, title = "내가 쓴 글")
-        SectionItem(icon = Icons.Default.Star, title = "댓글 단 글")
+        SectionItem(icon = Icons.Default.MailOutline, title = "댓글 단 글")
         SectionItem(icon = Icons.Default.Star, title = "스크랩")
     }
 }
 
+
+
+
 @Composable
 fun ShopSection() {
-    Column {
+    Column{
         Text(text = "상점",
             modifier = Modifier
                 .padding(8.dp),
@@ -181,13 +186,13 @@ fun ShopSection() {
             fontWeight = FontWeight.Bold
         )
         DividerSection()
-        SectionItem(icon = Icons.Default.List, title = "주문 목록")
-        SectionItem(icon = Icons.Default.List, title = "선물함")
-        SectionItem(icon = Icons.Default.List, title = "리뷰 관리")
-        SectionItem(icon = Icons.Default.List, title = "결제수단")
-        SectionItem(icon = Icons.Default.List, title = "할인쿠폰")
-        SectionItem(icon = Icons.Default.List, title = "공지사항")
-        SectionItem(icon = Icons.Default.List, title = "고객센터")
+        SectionItem(icon = Icons.Default.ShoppingCart, title = "주문 목록") // 주문 목록
+        SectionItem(icon = Icons.Default.FavoriteBorder, title = "선물함")     // 선물함
+        SectionItem(icon = Icons.Default.Email, title = "리뷰 관리")     // 리뷰 관리
+        SectionItem(icon = Icons.Default.AccountBox, title = "결제수단")       // 결제수단
+        SectionItem(icon = Icons.Default.CheckCircle, title = "할인쿠폰")    // 할인쿠폰
+        SectionItem(icon = Icons.Default.Info, title = "공지사항")  // 공지사항
+        SectionItem(icon = Icons.Default.Settings, title = "고객센터")  // 고객센터
     }
 
 }

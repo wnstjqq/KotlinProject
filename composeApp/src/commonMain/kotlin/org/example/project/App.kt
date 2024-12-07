@@ -2,45 +2,32 @@ package org.example.project
 
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinproject.composeapp.generated.resources.Res
-import org.jetbrains.compose.resources.painterResource
 import kotlinproject.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 
 expect fun createRetrofit(): Any
 
@@ -63,7 +50,8 @@ fun App() {
                 onSmell = { currentScreen = "Smell"},
                 onStainless = { currentScreen = "Stainless"},
                 onTisue = { currentScreen = "Tisue"},
-                onSoft = { currentScreen = "Soft"}
+                onSoft = { currentScreen = "Soft"},
+                onCategoryClick = { currentScreen = "category" } // 카테고리 클릭 시 전환
             )
             "Bar" -> Bar(onBackBarClick = { currentScreen = "home" })
             "Cup" -> Cup(onBackBarClick = { currentScreen = "home" })
@@ -84,6 +72,10 @@ fun App() {
             "like" -> like(onHome = { currentScreen = "home" },
                 onProfile= { currentScreen = "profile"})
             "solid" -> solid(onBackBarClick = { currentScreen = "searchResult" })
+            "category" -> CategoryScreen(onHome = { currentScreen = "home"},
+                onLiked = { currentScreen = "like"},
+                onProfile = { currentScreen = "profile"},
+                onSusemi = { currentScreen = "Susemi"} )
         }
     }
 }
@@ -101,7 +93,9 @@ fun Main(onBambooClick: () -> Unit,
         onSmell: () -> Unit,
         onStainless: () -> Unit,
         onTisue: () -> Unit,
-        onSoft: () -> Unit) {
+        onSoft: () -> Unit,
+        onCategoryClick: () -> Unit
+         ) {
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf("", "", "")
     val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.Favorite, Icons.Filled.Person)
@@ -109,17 +103,47 @@ fun Main(onBambooClick: () -> Unit,
         listOf(Icons.Outlined.Home, Icons.Outlined.FavoriteBorder, Icons.Outlined.Person)
     var isVisible by remember { mutableStateOf(true)}
 
-    Box(modifier = Modifier.fillMaxSize().padding(bottom = 10.dp)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 10.dp)
+    ) {
         // Main content on top of the NavigationBar
         Column(
             modifier = Modifier.fillMaxWidth(),//.verticalScroll(scrollState),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "Ecompass", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),modifier = Modifier.padding(top = 10.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start // 아이콘을 왼쪽 정렬
+                ) {
+                    // 카테고리 아이콘 추가
+                    IconButton(onClick = onCategoryClick)
+                    {
+                        Icon(
+                            imageVector = Icons.Filled.List,
+                            contentDescription = "카테고리 열기",
+                            tint = Color.Black
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Ecompass",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -275,7 +299,8 @@ fun SearchResultScreen(
             // Top Bar with back button and logo
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
                 IconButton(onClick = onBackBarClick) {
                     Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로가기")
