@@ -4,6 +4,8 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -1864,7 +1866,19 @@ fun solid(onBackBarClick: () -> Unit) {
 fun Bamboo(onBackBarClick: () -> Unit) {
     val uriHandler = LocalUriHandler.current
     var currentScreen by remember { mutableStateOf("bamboo") }
+    var currentTab by remember { mutableStateOf(0) } // 0: 상품정보, 1: 구매사이트
     var selectedItem by remember { mutableIntStateOf(0) }
+
+    val dummyProducts = remember {
+        listOf(
+            ProductItem("대나무 칫솔", 4.85, 6100, Res.drawable.chop),
+            ProductItem("고체 샴푸바", 4.84, 16630, Res.drawable.chop),
+            ProductItem("천연 수세미", 4.82, 2300, Res.drawable.chop),
+            ProductItem("고체 치약", 4.69, 9520, Res.drawable.chop),
+            ProductItem("실리콘 지퍼백", 4.43, 15900, Res.drawable.chop)
+        )
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // 첫 번째 화면: 대나무 화면
         AnimatedVisibility(
@@ -1898,6 +1912,8 @@ fun Bamboo(onBackBarClick: () -> Unit) {
                         selectedItem = index
                         if (index == 1) {
                             currentScreen = "newScreen"
+                        } else {
+                            currentScreen = "bamboo"
                         }
                     }
                 )
@@ -1919,65 +1935,93 @@ fun Bamboo(onBackBarClick: () -> Unit) {
                 // 제목 텍스트
                 Text(
                     text = "대나무 칫솔",
-                    textAlign = TextAlign.Center)
-                // 설명 텍스트를 스크롤 가능하게 변경
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(8.dp))
-                        .height(400.dp)
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState()) // 스크롤 추가
-                ) {
-                    StyledText(
-                        title = "주요 특징",
-                        content = buildAnnotatedString {
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                append("• 100% 자연 친화적 소재")
-                            }
-                            append(": 대나무 칫솔은 100% 자연에서 온 대나무로 만들어져 사용 후에도 자연스럽게 분해되어 지구에 부담을 주지 않음.\n\n")
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                append("• 완전한 생분해")
-                            }
-                            append(": 대나무는 빠르게 자라며, 농약이나 화학 비료를 사용하지 않기 때문에 자연 그대로의 상태로 사용될 수 있음.\n\n")
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                append("• 내구성")
-                            }
-                            append(": 대나무 칫솔은 내구성이 뛰어나며, 사용이 편리한 가격대의 플라스틱 칫솔에 비해 경제적임.")
-                        }
-                    )
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,  // 글씨 굵게
+                    fontSize = 24.sp
+                )
 
-                    StyledText(
-                        title = "주요 사항",
-                        content = buildAnnotatedString {
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                append("""
+                Spacer(modifier = Modifier.height(16.dp))
+
+
+                // 탭 네비게이션 바
+                CustomNavigationBar(
+                    items = listOf("상품정보", "구매사이트"),
+                    selectedIcons = listOf("상품정보", "구매사이트"),
+                    unselectedIcons = listOf("상품정보", "구매사이트"),
+                    selectedItem = currentTab,
+                    onItemSelected = { index ->
+                        currentTab = index
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                when (currentTab) {
+                    0 -> {
+                        // 상품정보 화면
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(8.dp))
+                                .height(400.dp)
+                                .padding(16.dp)
+                                .verticalScroll(rememberScrollState()) // 스크롤 추가
+                        ) {
+                            StyledText(
+                                title = "주요 특징",
+                                content = buildAnnotatedString {
+                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append("• 100% 자연 친화적 소재")
+                                    }
+                                    append(": 대나무 칫솔은 100% 자연에서 온 대나무로 만들어져 사용 후에도 자연스럽게 분해되어 지구에 부담을 주지 않음.\n\n")
+                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append("• 완전한 생분해")
+                                    }
+                                    append(": 대나무는 빠르게 자라며, 농약이나 화학 비료를 사용하지 않기 때문에 자연 그대로의 상태로 사용될 수 있음.\n\n")
+                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append("• 내구성")
+                                    }
+                                    append(": 대나무 칫솔은 내구성이 뛰어나며, 사용이 편리한 가격대의 플라스틱 칫솔에 비해 경제적임.")
+                                }
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+
+                            StyledText(
+                                title = "주요 사항",
+                                content = buildAnnotatedString {
+                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append(
+                                            """
 • 칫솔을 너무 오랜 시간 동안 습기가 있는 곳에 두지 말고, 건조한 곳에 보관하십시오.
                                     
 • 대나무는 물에 오래 노출되면 변형될 수 있으므로 사용 후 잘 말려주십시오.
                                     
-• 칫솔의 강도와 경도에 따라 칫솔의 사용 느낌이 달라지며, 일반적으로 부드럽고, 중간, 단단한 종류가 있습니다.""")
+• 칫솔의 강도와 경도에 따라 칫솔의 사용 느낌이 달라지며, 일반적으로 부드럽고, 중간, 단단한 종류가 있습니다."""
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+                    1 -> {
+                        // 구매사이트 화면
+                        LazyVerticalGrid(
+                            columns = GridCells.Adaptive(minSize = 140.dp),
+                            modifier = Modifier.fillMaxSize(), // 크기 조정
+                            contentPadding = PaddingValues(10.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            items(dummyProducts.size) { index ->
+                                ItemCard(product = dummyProducts[index]) {
+                                    // 구매 사이트 네비게이션 로직 추가
+                                }
                             }
                         }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 버튼
-                Button(
-                    onClick = {
-                        uriHandler.openUri("https://smartstore.naver.com/giraffe_store/products/5497692332?nl-au=451e104c09f7467bbc7eb4c287c6cfdd&nl-query=%EB%8C%80%EB%82%98%EB%AC%B4+%EC%B9%AB%EC%86%94")
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(25.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFA1B5D8)
-                    )
-                ) {
-                    Text("구매하러 가기", color = Color.White)
+                    }
                 }
             }
         }
@@ -2057,25 +2101,12 @@ fun Bamboo(onBackBarClick: () -> Unit) {
                         textAlign = TextAlign.Start
                     )
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 버튼
-                Button(
-                    onClick = { /* 구매 버튼 클릭 시 동작 */ },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(25.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFA1B5D8))
-                ) {
-                    Text("구매하러 가기", color = Color.White)
-                }
             }
         }
     }
 }
+
+
 
 @Composable
 fun StyledText(title: String, content: AnnotatedString) {

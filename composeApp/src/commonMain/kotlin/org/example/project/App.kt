@@ -269,7 +269,6 @@ data class ProductItem(
     val tags: List<String> = emptyList()
 )
 
-
 @Composable
 fun SearchResultScreen(
     onLiked: () -> Unit = {},
